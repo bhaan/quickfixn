@@ -6,6 +6,23 @@ namespace QuickFix
 {
     // TODO v2.0 - consider changing to internal
 
+    class NoOpLog : ILog
+    {
+        public void Dispose()
+        { }
+
+        public void Clear()
+        { }
+
+        public void OnIncoming(string msg)
+        { }
+
+        public void OnOutgoing(string msg)
+        { }
+
+        public void OnEvent(string s)
+        { }
+    }
 
     /// <summary>
     /// Created by a ThreadedSocketReactor to handle a client connection.
@@ -32,7 +49,7 @@ namespace QuickFix
         private Thread thread_ = null;
         private volatile bool isShutdownRequested_ = false;
         private SocketReader socketReader_;
-        private FileLog log_;
+        private NoOpLog log_;
 
         [Obsolete("Don't use this constructor")]
         public ClientHandlerThread(TcpClient tcpClient, long clientId)
@@ -54,14 +71,16 @@ namespace QuickFix
         /// <param name="debugLogFilePath">path where thread log will go</param>
         public ClientHandlerThread(TcpClient tcpClient, long clientId, QuickFix.Dictionary settingsDict, SocketSettings socketSettings)
         {
-            string debugLogFilePath = "log";
-            if (settingsDict.Has(SessionSettings.DEBUG_FILE_LOG_PATH))
-                debugLogFilePath = settingsDict.GetString(SessionSettings.DEBUG_FILE_LOG_PATH);
-            else if (settingsDict.Has(SessionSettings.FILE_LOG_PATH))
-                debugLogFilePath = settingsDict.GetString(SessionSettings.FILE_LOG_PATH);
+            //string debugLogFilePath = "log";
+            //if (settingsDict.Has(SessionSettings.DEBUG_FILE_LOG_PATH))
+            //    debugLogFilePath = settingsDict.GetString(SessionSettings.DEBUG_FILE_LOG_PATH);
+            //else if (settingsDict.Has(SessionSettings.FILE_LOG_PATH))
+            //    debugLogFilePath = settingsDict.GetString(SessionSettings.FILE_LOG_PATH);
 
             // FIXME - do something more flexible than hardcoding a filelog
-            log_ = new FileLog(debugLogFilePath, new SessionID("ClientHandlerThread", clientId.ToString(), "Debug"));
+            // new FileLog(debugLogFilePath, new SessionID("ClientHandlerThread", clientId.ToString(), "Debug"));
+
+            log_ = new NoOpLog();
 
             this.Id = clientId;
             socketReader_ = new SocketReader(tcpClient, socketSettings, this);
